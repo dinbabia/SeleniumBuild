@@ -1,0 +1,105 @@
+import pytest
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+
+
+class DriverInfo:
+    '''Stored driver information/attributes used.
+        ----------------------------------------
+    Attributes:
+    
+        * STAGE_BASE_URL = "https://stage.coilcraft.co/en-us/tools/" 
+        * PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
+        
+        * base_url = {URL Chosen based on the environment used.}
+        * browser = {Browser chosen after indicating --browser. Default value is 'chrome'}
+        * environment = {Environment chosen after indicating --env. Default value is 'stage'}
+    '''
+    STAGE_BASE_URL = "https://stage.coilcraft.co/en-us/tools/"
+    PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
+    
+    base_url = ""
+    browser = ""
+    environment = ""
+    
+#Instantiate Class DriverInfo
+driver_info = DriverInfo
+
+def pytest_addoption(parser):
+    '''Add parameters when running the program. 
+        
+        +Parameters:
+            * --env : Environment of the page chosen. Either stage or prod(Production).
+            * --browser : Browser used for testing. Chrome, Firefox, or Edge.
+        +How to use:
+            When running the program, use this in the terminal.
+            * pytest --env prod (when you want to test on the production environement. You can leave it blank since default is stage.)
+            * pytest --browser firefox (when you want to test using the firefox browser. You can leave it blank since default is chrome.)
+    '''
+    parser.addoption("--env", action="store", default="stage")
+    parser.addoption("--browser", action="store", default="chrome")
+
+@pytest.fixture
+def getEnv(request):
+    '''Add environment fixtures from addoption to your driver.  
+    Will also add the value of --env to class DriverInfo.environment
+    * return: value of --env (stage , prod)
+    '''
+    _env = request.config.getoption("--env")
+    driver_info.environment = _env
+    return _env
+
+@pytest.fixture
+def getBrowser(request):
+    '''Add browser fixtures from addoption to your driver.  
+    Will also add the value of --browser to class DriverInfo.browser
+    * return: value of --browser (chrome , firefox, edge)
+    '''
+    _browser = request.config.getoption("--browser")
+    driver_info.browser = _browser
+    return _browser
+
+def init_env(env):
+    '''Get the value of --env and add it to class DriverInfo.base_url.
+    * return: Base url depends on the value of --env
+    '''
+    if env == "stage":
+        driver_info.base_url = driver_info.STAGE_BASE_URL
+        return driver_info.base_url
+    elif env == "prod":
+        driver_info.base_url = driver_info.PROD_BASE_URL
+        return driver_info.base_url
+
+@pytest.fixture
+def init_driver(request, getEnv, getBrowser):
+    '''Start and initialize the webdriver.
+    + Will use the pytest fixtures during the initialization. (All from fixtures with "request")
+    + You can edit the options/config to be used in the browser here.(headless, window-size, etc)
+    '''
+    
+    _envi = init_env(getEnv)
+    #Set driver options
+    if getBrowser == "chrome":
+        options = Options()
+        options.headless = False
+        options.add_argument("window-size=1920x1080")
+        web_driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        web_driver.maximize_window()
+        web_driver.get(_envi)
+
+    if getBrowser == "firefox":
+        web_driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+        web_driver.get(_envi)
+    
+    #Go/run driver
+    request.cls.driver = web_driver
+    yield
+    web_driver.close()
+    request.cls.driver.close()
+    
+
+    
+
+
