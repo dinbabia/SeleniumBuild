@@ -1,0 +1,7 @@
+Open Powershell as Admin
+
+Enter the following command: 
+Set-ExecutionPolicy RemoteSigned
+
+You can restrict it again by using the command: 
+Set-ExecutionPolicy Restricted
