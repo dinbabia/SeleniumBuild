@@ -13,7 +13,6 @@ class Test_Contact_Us(BaseTest):
         Test Case 000-001 : Contact Us Button
         '''
         self.contact_us = ContactUsFeature(self.driver)
-        print(DriverInfo.base_url , DriverInfo.environment , DriverInfo.browser)
         self.contact_us.click_contact_us_button()
         assert True
         

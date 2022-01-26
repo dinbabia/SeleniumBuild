@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 class DriverInfo:
@@ -10,15 +11,13 @@ class DriverInfo:
         ----------------------------------------
     Attributes:
     
-        * STAGE_BASE_URL = "https://stage.coilcraft.co/en-us/tools/" 
+        * STAGE_BASE_URL = "https://www.innovuze.com/"
         * PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
         
         * base_url = {URL Chosen based on the environment used.}
         * browser = {Browser chosen after indicating --browser. Default value is 'chrome'}
         * environment = {Environment chosen after indicating --env. Default value is 'stage'}
     '''
-    # STAGE_BASE_URL = "https://stage.coilcraft.co/en-us/tools/"
-    # PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
     STAGE_BASE_URL = "https://www.innovuze.com/"
     PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
     
@@ -84,15 +83,34 @@ def init_driver(request, getEnv, getBrowser):
     _envi = init_env(getEnv)
     #Set driver options
     if getBrowser == "chrome":
+        
+        """You can change/add options for the browser here."""
         options = Options()
-        options.headless = False
-        options.add_argument("window-size=1920x1080")
-        web_driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        options.headless = True
+        # options.add_argument("window-size=1920x1080")
+        
+        #Add this if a specific website is very slow, hence it downloads many libraries and plugins. {normal, eager(interactive), none}
+        c_caps = DesiredCapabilities().CHROME.copy()
+        c_caps["pageLoadStrategy"] = "eager" 
+        
+        web_driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, desired_capabilities=c_caps)
         web_driver.maximize_window()
         web_driver.get(_envi)
 
-    if getBrowser == "firefox":
-        web_driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    elif getBrowser == "firefox":
+        
+        """You can change/add options for the browser here."""
+        options = webdriver.FirefoxOptions()
+        # options.add_argument('--headless')
+        # options.add_argument("--width=1080")
+        # options.add_argument("--height=1920")
+        
+        #Add this if a specific website is very slow, hence it downloads many libraries and plugins. {normal, eager(interactive), none}
+        ff_caps = DesiredCapabilities().FIREFOX.copy()
+        ff_caps["pageLoadStrategy"] = "none" 
+        
+        web_driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options, desired_capabilities=ff_caps)
+        web_driver.maximize_window()
         web_driver.get(_envi)
     
     #Go/run driver
@@ -101,6 +119,7 @@ def init_driver(request, getEnv, getBrowser):
     web_driver.close()
     
     
+#pytest -k test_contact_us_form_inputs -v --disable-pytest-warnings --browser firefox
 
     
 
