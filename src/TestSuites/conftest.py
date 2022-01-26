@@ -17,7 +17,9 @@ class DriverInfo:
         * browser = {Browser chosen after indicating --browser. Default value is 'chrome'}
         * environment = {Environment chosen after indicating --env. Default value is 'stage'}
     '''
-    STAGE_BASE_URL = "https://stage.coilcraft.co/en-us/tools/"
+    # STAGE_BASE_URL = "https://stage.coilcraft.co/en-us/tools/"
+    # PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
+    STAGE_BASE_URL = "https://www.innovuze.com/"
     PROD_BASE_URL = "https://www.coilcraft.com/en-us/tools/"
     
     base_url = ""
@@ -97,7 +99,7 @@ def init_driver(request, getEnv, getBrowser):
     request.cls.driver = web_driver
     yield
     web_driver.close()
-    request.cls.driver.close()
+    
     
 
     
